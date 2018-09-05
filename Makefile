@@ -19,7 +19,7 @@ lib/libland.so: $(OBJECTS)
 py/land.so:
 	python setup.py build_ext
 	python setup.py install --prefix=./py
-	rm -rf build py/*.c
+	rm -rf build py/src/*.c
 
 %.o : %.c
 	$(CC) $(INCLUDE) $(CFLAGS) $< -o $@

@@ -3,5 +3,5 @@
 *.aux
 *.log
 *.gz
-py/*.c
+py/src/*.c
 py/lib
