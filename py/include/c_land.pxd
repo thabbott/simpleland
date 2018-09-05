@@ -8,5 +8,7 @@ cdef extern from "land.h":
                    double phi, double phi_fc,
                    double phi_pwp, double r_sfc,
                    double z_atm, double z_0,
-                   double *shf, double *lhf,
-                   double *taux, double *tauy);
+                   double *Ri_b_out, double *zeta_out,
+                   double *C_k_out, double *C_d_out,
+                   double *shf_out, double *lhf_out,
+                   double *taux_out, double *tauy_out)

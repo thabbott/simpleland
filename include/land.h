@@ -25,10 +25,13 @@
  * @param r_sfc soil resistance at field capacity
  * @param z_atm distance between surface and lowest model level
  * @param z_0 surface roughness length
- * @param shf surface sensible heat flux (output, W/m^2)
- * @param lhf surface latent heat flux (output, W/m^2)
- * @param taux surface stress in u direction (output, m^2/s^2)
- * @param tauy surface stress in v direction (output, m^2/s^2)
+ * @param zeta_out Monin-Obukhov stability parameter (output, nondim)
+ * @param C_k_out Surface exchange coefficient (output, nondim)
+ * @param C_d_out Surface drag coefficient (output, nondim)
+ * @param shf_out surface sensible heat flux (output, W/m^2)
+ * @param lhf_out surface latent heat flux (output, W/m^2)
+ * @param taux_out surface stress in u direction (output, m^2/s^2)
+ * @param tauy_out surface stress in v direction (output, m^2/s^2)
  */
 extern void land_flux(double rho, double grav,
                       double c_p, double L_v,
@@ -38,9 +41,11 @@ extern void land_flux(double rho, double grav,
                       double u_min,
                       double phi, double phi_fc,
                       double phi_pwp, double r_sfc,
-                      double z_atm, double z_0,
-                      double *shf, double *lhf,
-                      double *taux, double *tauy);
+		      double z_atm, double z_0,
+		      double *Ri_b_out, double *zeta_out, 
+		      double *C_k_out, double *C_d_out,
+                      double *shf_out, double *lhf_out,
+                      double *taux_out, double *tauy_out);
 
 #define _LAND_H
 #endif

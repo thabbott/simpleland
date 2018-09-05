@@ -23,13 +23,16 @@
 static const double Pr_0 = 0.74;
 /** von Karman constant */
 static const double k_vK = 0.40;
-/** Bulk Richardson number where unstable solution changes */
-static const double Ri_c = -0.2097;
 /** Profile function parameters */
 static const double alpha_m = 4.7;
 static const double beta_m = 15.0;
-static const double alpha_h = 6.35135135135;
+static const double alpha_h = 6.35;
 static const double beta_h = 9.0;
+/** Maximum bulk Richardson number */
+static const double Ri_b_max = 0.21;
+/** Minimum surface-atmosphere disequilibria */
+static const double dtheta_min = 1e-6;
+static const double dq_min = 1e-6;
 
 /**
  * Implements land_flux
@@ -43,16 +46,31 @@ void simple_land_flux(double rho, double grav,
                       double phi, double phi_fc,
                       double phi_pwp, double r_sfc,
 		      double z_atm, double z_0,
-                      double *shf, double *lhf,
-                      double *taux, double *tauy) {
+		      double *Ri_b_out, double *zeta_out, 
+		      double *C_k_out, double *C_d_out,
+                      double *shf_out, double *lhf_out,
+                      double *taux_out, double *tauy_out) {
+
+  // Check disequilibria for near-zero values
+  double dtheta = theta_atm - theta_s;
+  if (fabs(dtheta) < dtheta_min) {
+    dtheta = dtheta_min;
+  }
+  double dq = q_atm - qstar_s;
+  if (fabs(dq) < dq_min) {
+    dq = dq_min;
+  }
 
   // Calculate bulk Richardson number
+  // Includes a check for Ri_b > alpha_m
   double u_mag = sqrt(u_atm*u_atm + v_atm*v_atm);
   if (u_mag < u_min) { 
     u_mag = u_min; 
   }
-  double Ri_b = grav / theta_s *
-    (theta_atm - theta_s) * z_atm / (u_mag * u_mag);
+  double Ri_b = grav / theta_s * dtheta * z_atm / (u_mag * u_mag);
+  if (Ri_b > Ri_b_max) {
+    Ri_b = Ri_b_max;
+  }
 
   // Calculate M-O stability parameter
   double zeta;
@@ -84,11 +102,11 @@ void simple_land_flux(double rho, double grav,
     Pb = 1.0 / 54.0 * (-2.0 / pow(beta_m, 3.0) + 
       9 / beta_m * (-beta_h / beta_m + 3.0) * sb * sb);
     thetab = acos(Pb / pow(Qb, 1.5));
-    Tb = pow(sqrt(pow(Pb, 2.0) + pow(Qb, 3.0)) + abs(Pb), 1.0/3.0);
+    Tb = pow(sqrt(pow(Pb, 2.0) - pow(Qb, 3.0)) + fabs(Pb), 1.0/3.0);
     
-    if (Ri_b > Ri_c) {
+    if (pow(Qb, 3.0) - pow(Pb, 2.0) < 0) {
       zeta = z_atm / (z_atm - z_0) * log(z_atm / z_0) *
-        (-(Tb + Qb / Tb) + 1 / (3.0 * beta_m));
+        (-(Tb + Qb / Tb) + 1.0 / (3.0 * beta_m));
     } else {
       zeta = z_atm / (z_atm - z_0) * log(z_atm / z_0) * 
         (-2.0 * sqrt(Qb) * cos(thetab / 3.0) + 1.0 / (3.0 * beta_m));
@@ -104,22 +122,36 @@ void simple_land_flux(double rho, double grav,
     psi_h = 2.0 * log((1.0 + y) / (1.0 + y_0));
   }
 
+  // Calculate exchange coefficients
+  double u_star = k_vK * u_mag / (log(z_atm / z_0) - psi_m);
+  double theta_star = k_vK * dtheta / Pr_0 / (log(z_atm / z_0) - psi_h);
+  double C_d = u_star * u_star / (u_mag * u_mag);
+  double C_k = u_star * theta_star / (u_mag * dtheta);
+
   // Calculate surface stresses
-  double tau_on_u = -k_vK * k_vK * pow(log(z_atm / z_0) - psi_m, -2.0) * u_mag;
-  *taux = tau_on_u * u_atm;
-  *tauy = tau_on_u * v_atm;
+  double taux = -C_d * u_mag * u_atm;
+  double tauy = -C_d * u_mag * v_atm;
   
   // Calculate aerodynamic resistance
-  double r_a = Pr_0 * (log(z_atm / z_0) - psi_m) * (log(z_atm / z_0) - psi_h) / 
-    (k_vK * k_vK * u_mag);
+  double r_a = 1.0 / (C_k * u_mag);
   
   // Calculate soil resistance
   double r_s = r_sfc * (phi_fc - phi_pwp) / (phi - phi_pwp);
 
   // Calculate sensible heat flux
-  *shf = rho * c_p / r_a * (theta_s - theta_atm);
+  double shf = -rho * c_p / r_a * dtheta;
 
   // Calculate latent heat flux
-  *lhf = rho * L_v / (r_a + r_s) * (qstar_s - q_atm);
+  double lhf = -rho * L_v / (r_a + r_s) * dq;
+
+  // Set outputs
+  *Ri_b_out = Ri_b;
+  *zeta_out = zeta;
+  *C_d_out = C_d;
+  *C_k_out = C_k;
+  *shf_out = shf;
+  *lhf_out = lhf;
+  *taux_out = taux;
+  *tauy_out = tauy;
 
 }
