@@ -1,0 +1,7 @@
+*.o
+*.so
+*.aux
+*.log
+*.gz
+py/*.c
+py/lib
