@@ -4,6 +4,7 @@
 \usepackage{amsmath}
 \usepackage{physics}
 \usepackage{natbib}
+\usepackage{graphicx}
 
 \title{Simple Land Surface Scheme}
 \author{Tristan Abbott}
@@ -47,7 +48,9 @@ Finally, vertical momentum fluxes (i.e. surface stresses) are parameterized by a
 \tau_i = -C_d |{\bf u}_{\mathrm{atm}}| u_i.
 \end{equation}
 
-The drag coefficients are modeled using Monin-Obukhov similarity theory following \citet{Byun1990}. The goal of the model is to relate surface fluxes of heat, momentum, and moisture to winds, temperature, and moisture at the surface and the lowest model level; i.e. to calculate
+\section{Byun (1990) Monin-Obukhov scheme}
+
+One option for modelling drag coefficients follows \citet{Byun1990}. The goal of the model is to relate surface fluxes of heat, momentum, and moisture to winds, temperature, and moisture at the surface and the lowest model level; i.e. to calculate
 \begin{equation*}
 C_d = \frac{u_*^2}{|{\bf u}_{\mathrm{atm}}|^2}
 \end{equation*}
@@ -170,5 +173,38 @@ The algorithm for computing surface fluxes is as follows
 \item Calculate $r_s$ from Equation \ref{eqn:r_s}
 \item Calculate $H$ and $S$ from Equations \ref{eqn:H} and \ref{eqn:S}
 \end{enumerate}
+
+\subsection{Results}
+
+Surface exchange and drag coefficients increase as the boundary layer becomes increasingly unstable (Figure \ref{fig:Byun4}). For stable boundary layers, exchange coefficients are set to zero above a critical bulk Richardson number of 0.21. Shutting turbulence off completely can have a dramatic impact on simulations run with a diurnal cycle over low heat capacity surfaces: these simulations frequently form nighttime radiation fog In the total absence of a nighttime atmosphere-to-surface moisture flux, but even a very small  moisture flux (on the order of 1 W/m$^2$) can be enough to prevent fog from forming.
+
+\begin{figure}
+\begin{center}
+\includegraphics[height=0.4\textheight]{Byun1990Figure4a.pdf}
+\includegraphics[height=0.4\textheight]{Byun1990Figure4b.pdf}
+\end{center}
+\caption{Variation of drag and exchange coefficients with bulk Richardson number for different surface layer depths.}
+\label{fig:Byun4}
+\end{figure}
+
+\section{UCLA LES Monin-Obukhov scheme}
+
+This land surface scheme also includes an option to model drag and exchange coefficients using profile functions from the UCLA LES \citep{Stevens2010}:
+\[
+\gamma_m = 
+\begin{cases}
+1 + \alpha_m \zeta & \zeta \ge 0 \\
+\qty(1 - \beta_m \zeta)^{-1/2} & \zeta < 0
+\end{cases}
+\]
+and
+\[
+\gamma_h = 
+\begin{cases}
+\mathrm{Pr}_0 (1 + \alpha_h \zeta) & \zeta \ge 0 \\
+\mathrm{Pr}_0 (1 - \beta_h \zeta)^{-1/2} &  \zeta < 0
+\end{cases}
+\]
+with $Pr_0 = 0.74$, $\alpha_m = 4.8$, $\alpha_h = 7.8$, $\beta_m = 19.3$, and $\beta_h = 12.0$.
 
 \end{document}
