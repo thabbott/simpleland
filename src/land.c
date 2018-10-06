@@ -17,74 +17,75 @@
 /* Macros */
 #define MAX(X,Y) (((X) > (Y)) ? (X) : (Y))
 #define MIN(X,Y) (((X) < (Y)) ? (X) : (Y))
+#define ABS(X) ((X) > 0 ? (X) : (-(X)))
 
 /* Private constants */
 /** Neutral stability Prandtl number */
-static const double Pr_0 = 0.74;
+static const REAL Pr_0 = 0.74;
 /** von Karman constant */
-static const double k_vK = 0.40;
+static const REAL k_vK = 0.40;
 /** Profile function parameters */
-static const double alpha_m = 4.7;
-static const double beta_m = 15.0;
-static const double alpha_h = 6.35;
-static const double beta_h = 9.0;
+static const REAL alpha_m = 4.7;
+static const REAL beta_m = 15.0;
+static const REAL alpha_h = 6.35;
+static const REAL beta_h = 9.0;
 /** Maximum bulk Richardson number */
-static const double Ri_b_max = 0.21;
+static const REAL Ri_b_max = 0.21;
 /** Minimum surface-atmosphere disequilibria */
-static const double dtheta_min = 1e-6;
-static const double dq_min = 1e-6;
+static const REAL dtheta_min = 1e-6;
+static const REAL dq_min = 1e-6;
 
 /**
  * Implements land_flux
  */
-void simple_land_flux(double rho, double grav,
-                      double c_p, double L_v,
-                      double theta_s, double theta_atm,
-                      double qstar_s, double q_atm,
-                      double u_atm, double v_atm,
-                      double u_min,
-                      double phi, double phi_fc,
-                      double phi_pwp, double r_sfc,
-		      double z_atm, double z_0,
-		      double *Ri_b_out, double *zeta_out, 
-		      double *C_k_out, double *C_d_out,
-                      double *shf_out, double *lhf_out,
-                      double *taux_out, double *tauy_out) {
+void simple_land_flux(REAL grav,
+                      REAL theta_s, REAL theta_atm,
+                      REAL qstar_s, REAL q_atm,
+                      REAL u_atm, REAL v_atm,
+                      REAL u_min,
+                      REAL phi, REAL phi_fc,
+                      REAL phi_pwp, REAL r_sfc,
+	              REAL z_atm, REAL z_0,
+	              REAL *Ri_b_out, REAL *zeta_out, 
+	              REAL *C_k_out, REAL *C_q_out,
+                      REAL *C_d_out,
+                      REAL *shf_out, REAL *lhf_out,
+                      REAL *taux_out, REAL *tauy_out) {
 
   // Check disequilibria for near-zero values
-  double dtheta = theta_atm - theta_s;
-  if (fabs(dtheta) < dtheta_min) {
+  REAL dtheta = theta_atm - theta_s;
+  if (ABS(dtheta) < dtheta_min) {
     dtheta = dtheta_min;
   }
-  double dq = q_atm - qstar_s;
-  if (fabs(dq) < dq_min) {
+  REAL dq = q_atm - qstar_s;
+  if (ABS(dq) < dq_min) {
     dq = dq_min;
   }
 
   // Calculate bulk Richardson number
   // Includes a check for Ri_b > alpha_m
-  double u_mag = sqrt(u_atm*u_atm + v_atm*v_atm);
+  REAL u_mag = sqrt(u_atm*u_atm + v_atm*v_atm);
   if (u_mag < u_min) { 
     u_mag = u_min; 
   }
-  double Ri_b = grav / theta_s * dtheta * z_atm / (u_mag * u_mag);
+  REAL Ri_b = grav / theta_s * dtheta * z_atm / (u_mag * u_mag);
   if (Ri_b > Ri_b_max) {
     Ri_b = Ri_b_max;
   }
 
   // Calculate M-O stability parameter
-  double zeta;
-  double sb;
-  double Qb;
-  double Pb;
-  double thetab;
-  double Tb;
-  double psi_m;
-  double psi_h;
-  double x;
-  double x_0;
-  double y;
-  double y_0;
+  REAL zeta;
+  REAL sb;
+  REAL Qb;
+  REAL Pb;
+  REAL thetab;
+  REAL Tb;
+  REAL psi_m;
+  REAL psi_h;
+  REAL x;
+  REAL x_0;
+  REAL y;
+  REAL y_0;
   if (Ri_b >= 0) {
    
     zeta = z_atm / (z_atm - z_0) * log(z_atm / z_0) / 
@@ -102,7 +103,7 @@ void simple_land_flux(double rho, double grav,
     Pb = 1.0 / 54.0 * (-2.0 / pow(beta_m, 3.0) + 
       9 / beta_m * (-beta_h / beta_m + 3.0) * sb * sb);
     thetab = acos(Pb / pow(Qb, 1.5));
-    Tb = pow(sqrt(pow(Pb, 2.0) - pow(Qb, 3.0)) + fabs(Pb), 1.0/3.0);
+    Tb = pow(sqrt(pow(Pb, 2.0) - pow(Qb, 3.0)) + ABS(Pb), 1.0/3.0);
     
     if (pow(Qb, 3.0) - pow(Pb, 2.0) < 0) {
       zeta = z_atm / (z_atm - z_0) * log(z_atm / z_0) *
@@ -123,32 +124,32 @@ void simple_land_flux(double rho, double grav,
   }
 
   // Calculate exchange coefficients
-  double u_star = k_vK * u_mag / (log(z_atm / z_0) - psi_m);
-  double theta_star = k_vK * dtheta / Pr_0 / (log(z_atm / z_0) - psi_h);
-  double C_d = u_star * u_star / (u_mag * u_mag);
-  double C_k = u_star * theta_star / (u_mag * dtheta);
+  REAL u_star = k_vK * u_mag / (log(z_atm / z_0) - psi_m);
+  REAL theta_star = k_vK * dtheta / Pr_0 / (log(z_atm / z_0) - psi_h);
+  REAL C_d = u_star * u_star / (u_mag * u_mag);
+  REAL C_k = u_star * theta_star / (u_mag * dtheta);
 
   // Calculate surface stresses
-  double taux = -C_d * u_mag * u_atm;
-  double tauy = -C_d * u_mag * v_atm;
+  REAL taux = -C_d * u_mag * u_atm;
+  REAL tauy = -C_d * u_mag * v_atm;
   
-  // Calculate aerodynamic resistance
-  double r_a = 1.0 / (C_k * u_mag);
-  
-  // Calculate soil resistance
-  double r_s = r_sfc * (phi_fc - phi_pwp) / (phi - phi_pwp);
+  // Calculate water vapor exchange coefficient including soil resistance
+  REAL C_q =
+    C_k * (phi - phi_pwp) / 
+    (phi - phi_pwp + C_k * u_mag * r_sfc * (phi_fc - phi_pwp));
 
   // Calculate sensible heat flux
-  double shf = -rho * c_p / r_a * dtheta;
+  REAL shf = -C_k * u_mag * dtheta;
 
   // Calculate latent heat flux
-  double lhf = -rho * L_v / (r_a + r_s) * dq;
+  REAL lhf = -C_q * u_mag * dq;
 
   // Set outputs
   *Ri_b_out = Ri_b;
   *zeta_out = zeta;
   *C_d_out = C_d;
   *C_k_out = C_k;
+  *C_q_out = C_q;
   *shf_out = shf;
   *lhf_out = lhf;
   *taux_out = taux;

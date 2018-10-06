@@ -3,15 +3,18 @@
 #define land_flux simple_land_flux
 
 /**
+ * Floating point type definition
+ */
+typedef double REAL;
+
+
+/**
  * land_flux
  *
  * Compute surface momentum, sensible heat, and latent heat fluxes. All
  * parameters should be given in MKS units.
  *
- * @param rho air density at lowest model level
  * @param grav gravitational acceleration
- * @param c_p atmospheric heat capacity at constant pressure
- * @param L_v latent heat of vaporization
  * @param theta_s potential temperature of surface
  * @param theta_atm potential temperature at lowest model level
  * @param qstar_s saturation specific humidity at temperature of surface
@@ -27,25 +30,26 @@
  * @param z_0 surface roughness length
  * @param zeta_out Monin-Obukhov stability parameter (output, nondim)
  * @param C_k_out Surface exchange coefficient (output, nondim)
+ * @param C_q_out Surface exchange coefficient for water vapor (output, nondim)
  * @param C_d_out Surface drag coefficient (output, nondim)
- * @param shf_out surface sensible heat flux (output, W/m^2)
- * @param lhf_out surface latent heat flux (output, W/m^2)
+ * @param shf_out surface sensible heat flux (output, K m/s)
+ * @param lhf_out surface latent heat flux (output, kg/kg m/s)
  * @param taux_out surface stress in u direction (output, m^2/s^2)
  * @param tauy_out surface stress in v direction (output, m^2/s^2)
  */
-extern void land_flux(double rho, double grav,
-                      double c_p, double L_v,
-                      double theta_s, double theta_atm,
-                      double qstar_s, double q_atm,
-                      double u_atm, double v_atm,
-                      double u_min,
-                      double phi, double phi_fc,
-                      double phi_pwp, double r_sfc,
-		      double z_atm, double z_0,
-		      double *Ri_b_out, double *zeta_out, 
-		      double *C_k_out, double *C_d_out,
-                      double *shf_out, double *lhf_out,
-                      double *taux_out, double *tauy_out);
+extern void land_flux(REAL grav,
+                      REAL theta_s, REAL theta_atm,
+                      REAL qstar_s, REAL q_atm,
+                      REAL u_atm, REAL v_atm,
+                      REAL u_min,
+                      REAL phi, REAL phi_fc,
+                      REAL phi_pwp, REAL r_sfc,
+		      REAL z_atm, REAL z_0,
+		      REAL *Ri_b_out, REAL *zeta_out, 
+		      REAL *C_k_out, REAL *C_q_out,
+		      REAL *C_d_out,
+                      REAL *shf_out, REAL *lhf_out,
+                      REAL *taux_out, REAL *tauy_out);
 
 #define _LAND_H
 #endif
