@@ -53,10 +53,11 @@ def land_flux(args):
     cdef double r_sfc = args['r_sfc']
     cdef double z_atm = args['z_atm']
     cdef double z_0 = args['z_0']
+    cdef double zeta_max = args['zeta_max']
 
     c_land.land_flux(grav, theta_s, theta_atm,
               qstar_s, q_atm, u_atm, v_atm, u_min,
-              phi, phi_fc, phi_pwp, r_sfc, z_atm, z_0,
+              phi, phi_fc, phi_pwp, r_sfc, z_atm, z_0, zeta_max,
               &Ri_b, &zeta, &C_k, &C_q, &C_d, &shf, &lhf, &taux, &tauy)
 
     return shf, lhf, taux, tauy, C_k, C_d, zeta, Ri_b

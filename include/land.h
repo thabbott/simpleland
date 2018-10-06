@@ -28,6 +28,7 @@ typedef double REAL;
  * @param r_sfc soil resistance at field capacity
  * @param z_atm distance between surface and lowest model level
  * @param z_0 surface roughness length
+ * @param zeta_max maximum Monin-Obukhov parameter under stable conditions
  * @param zeta_out Monin-Obukhov stability parameter (output, nondim)
  * @param C_k_out Surface exchange coefficient (output, nondim)
  * @param C_q_out Surface exchange coefficient for water vapor (output, nondim)
@@ -44,7 +45,7 @@ extern void land_flux(REAL grav,
                       REAL u_min,
                       REAL phi, REAL phi_fc,
                       REAL phi_pwp, REAL r_sfc,
-		      REAL z_atm, REAL z_0,
+		      REAL z_atm, REAL z_0, REAL zeta_max,
 		      REAL *Ri_b_out, REAL *zeta_out, 
 		      REAL *C_k_out, REAL *C_q_out,
 		      REAL *C_d_out,

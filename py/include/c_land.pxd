@@ -6,7 +6,7 @@ cdef extern from "land.h":
                    double u_min,
                    double phi, double phi_fc,
                    double phi_pwp, double r_sfc,
-                   double z_atm, double z_0,
+                   double z_atm, double z_0, double zeta_max,
                    double *Ri_b_out, double *zeta_out,
                    double *C_k_out, double *C_q_out,
                    double *C_d_out,

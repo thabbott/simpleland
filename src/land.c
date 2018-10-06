@@ -45,7 +45,7 @@ void simple_land_flux(REAL grav,
                       REAL u_min,
                       REAL phi, REAL phi_fc,
                       REAL phi_pwp, REAL r_sfc,
-	              REAL z_atm, REAL z_0,
+	              REAL z_atm, REAL z_0, REAL zeta_max,
 	              REAL *Ri_b_out, REAL *zeta_out, 
 	              REAL *C_k_out, REAL *C_q_out,
                       REAL *C_d_out,
@@ -92,6 +92,9 @@ void simple_land_flux(REAL grav,
            (2.0 * alpha_h * (alpha_m * Ri_b - 1.0)) *
            (-(2.0 * alpha_h * Ri_b - 1.0) - 
            pow(1.0 + 4.0 * (alpha_h - alpha_m) * Ri_b / Pr_0, 0.5));
+    if (zeta > zeta_max) {
+        zeta = zeta_max;
+    }
     psi_m = -alpha_m * zeta * (1.0 - z_0 / z_atm);
     psi_h = -alpha_h * zeta * (1.0 - z_0 / z_atm);
   
